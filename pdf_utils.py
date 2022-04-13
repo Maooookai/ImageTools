@@ -15,7 +15,7 @@ def extract_image_from_pdf(file_path, output_path=None):
     """
     pdf = fitz.Document(file_path)
     if '/' in file_path:
-        file_name = file_path.rpartition('/')[1]
+        file_name = file_path.rpartition('/')[2]
     else:
         file_name = file_path
     print(f'File [{file_name}] has {pdf.page_count} page in total')
@@ -33,9 +33,12 @@ def extract_image_from_pdf(file_path, output_path=None):
             image_ext = base_image["ext"]
             image = Image.open(io.BytesIO(image_bytes))
             if output_path is not None:
-                image.save(open(f"{output_path}/image{page_number + 1}_{page_number}.{image_ext}", "wb"))
+                if not os.path.exists(output_path):
+                    os.makedirs(output_path)
+                image.save(open(f"{output_path}/{file_name}_{page_number + 1}_{page_number}.{image_ext}", "wb"))
             else:
-                image.save(open(f"image{page_number + 1}_{page_number}.{image_ext}", "wb"))
+                image.save(open(f"{file_name}_{page_number + 1}_{page_number}.{image_ext}", "wb"))
+    pdf.close()
 
 
 def extract_image_from_dir(dir_path, output_path=None):
@@ -46,11 +49,15 @@ def extract_image_from_dir(dir_path, output_path=None):
     :param output_path: Directory to save images.
     :return: None
     """
-    if output_path is None:
-        output_path = 'images'
     if dir_path.endswith("/"):
+        if output_path is None:
+            output_path = dir_path + 'images'
         for file in os.listdir(dir_path):
-            extract_image_from_pdf(dir_path + file, output_path)
+            if file.lower().endswith('.pdf'):
+                extract_image_from_pdf(dir_path + file, output_path)
     else:
+        if output_path is None:
+            output_path = dir_path + '/' + 'images'
         for file in os.listdir(dir_path):
-            extract_image_from_pdf(dir_path + '/' + file, output_path)
+            if file.lower().endswith('.pdf'):
+                extract_image_from_pdf(dir_path + '/' + file, output_path)
