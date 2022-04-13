@@ -1,4 +1,5 @@
 import io
+import os
 
 import fitz
 from PIL import Image
@@ -38,4 +39,18 @@ def extract_image_from_pdf(file_path, output_path=None):
 
 
 def extract_image_from_dir(dir_path, output_path=None):
-    pass
+    """
+    Extract all images from pdf files in a directory.
+
+    :param dir_path: Directory that includes pdf files.
+    :param output_path: Directory to save images.
+    :return: None
+    """
+    if output_path is None:
+        output_path = 'images'
+    if dir_path.endswith("/"):
+        for file in os.listdir(dir_path):
+            extract_image_from_pdf(dir_path + file, output_path)
+    else:
+        for file in os.listdir(dir_path):
+            extract_image_from_pdf(dir_path + '/' + file, output_path)
